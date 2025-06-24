@@ -1,18 +1,24 @@
 export function getFixSuggestion(code) {
-  const fixes = [];
+   const fixes = [];
 
   const trimmed = code.trim();
 
+  // Remove comments
+  const codeWithoutComments = code
+    .split('\n')
+    .map(line => line.trim().startsWith('#') ? '' : line)
+    .join('\n');
+
   // 1. input() used
-  if (code.includes("input(")) {
+  if (codeWithoutComments.includes("input(")) {
     fixes.push({
       suggestion: "input() will open a popup!",
       explanation: "FixyPy supports input() via popup. Enter your value when prompted.",
     });
   }
-
+  
   // 2. string - number error
-  if (/".*"\s*[-+*/]\s*\d+/.test(code)) {
+   if (/".*"\s*[-+*/]\s*\d+/.test(codeWithoutComments)) {
     fixes.push({
       suggestion: `Convert number to string: "${trimmed.match(/"(.*)"/)?.[1] ?? "text"}" + str(1)`,
       explanation: "You can't subtract/add a number and string directly. Try converting types!",
@@ -36,9 +42,10 @@ export function getFixSuggestion(code) {
   }
 
   // 5. Looks valid (has print)
-  if (code.includes("print(")) {
+  if (codeWithoutComments.includes("print(")) {
     return null;
   }
 
   return fixes.length > 0 ? fixes[0] : null;
+
 }

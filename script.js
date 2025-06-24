@@ -1,45 +1,34 @@
 import { getFixSuggestion } from './pyfixer.js';
 
 let pyodide;
+let oldDecorations = [];
 
 async function init() {
   pyodide = await loadPyodide();
-  
-
-  const res = await fetch("fixer.html");
-  const html = await res.text();
-
-  // Inject fixer.html into page
-  document.getElementById("app").innerHTML = html;
-
-  // Attach event listener AFTER injection
-  const executeBtn = document.getElementById("execute");
-  executeBtn.addEventListener("click", runCode);
+  document.getElementById("execute").addEventListener("click", runCode);
 }
 
 async function runCode() {
-  const codeInput = document.getElementById("code").value;
+  const codeInput = window.editor.getValue();
   const outputDiv = document.getElementById("output");
 
   const suggestion = getFixSuggestion(codeInput);
   if (suggestion) {
     outputDiv.innerHTML = `
-      <div class="text-yellow-300 font-semibold mb-1">💡 Suggestion:</div>
-      <div class="text-sm text-green-100 whitespace-pre-wrap font-mono">${suggestion.suggestion}</div>
-      <div class="text-sm text-green-400 whitespace-pre-wrap font-mono mt-1">${suggestion.explanation}</div>
+    <div class="text-yellow-300 font-semibold mb-1">Suggestion:</div>
+    <div class="text-sm text-green-100 whitespace-pre-wrap font-mono">${suggestion.suggestion}</div>
+    <div class="text-sm text-green-400 whitespace-pre-wrap font-mono mt-1">${suggestion.explanation}</div>
     `;
     return;
   }
 
-  let code = codeInput;
-  const inputMatches = [...code.matchAll(/input\((.*?)\)/g)];
-
+  const inputMatches = [...codeInput.matchAll(/input\((.*?)\)/g)];
   if (inputMatches.length > 0) {
-    handleInputs(code, inputMatches, 0);
+    handleInputs(codeInput, inputMatches, 0);
     return;
   }
 
-  runFinalCode(code);
+  runFinalCode(codeInput);
 }
 
 function handleInputs(code, matches, i) {
@@ -52,7 +41,7 @@ function handleInputs(code, matches, i) {
   const inputField = document.getElementById("inputField");
   const promptText = document.getElementById("inputPrompt");
   const submitBtn = document.getElementById("submitInput");
-
+  
   const question = matches[i][1]?.replaceAll(/['"]/g, "").trim() || "Enter value:";
   promptText.textContent = question;
   inputField.value = "";
@@ -70,6 +59,11 @@ function handleInputs(code, matches, i) {
 async function runFinalCode(code) {
   const outputDiv = document.getElementById("output");
 
+  //clear old highlights
+  if (oldDecorations.length > 0) {
+    oldDecorations = window.editor.deltaDecorations(oldDecorations, []);
+  }
+
   try {
     await pyodide.runPythonAsync(`
 import sys
@@ -78,13 +72,21 @@ sys.stdout = StringIO()
 ${code}
 output = sys.stdout.getvalue()
     `);
+
     const result = pyodide.globals.get("output");
     outputDiv.innerText = result || "No output.";
   } catch (err) {
     const message = err.toString();
     const suggestions = [];
+    
+    //match line number for highlighting
+    let highlightLine = null;
+    const match1 = message.match(/File "<stdin>", line (\d+)/);
+    const match2 = message.match(/line (\d+), in <module>/);
+    if (match1) highlightLine = parseInt(match1[1]);
+    else if (match2) highlightLine = parseInt(match2[1]);
 
-    // NameError
+    //suggestions
     if (message.includes("NameError") && /name '(.+?)' is not defined/.test(message)) {
       const name = message.match(/name '(.+?)' is not defined/)[1];
       suggestions.push({
@@ -93,7 +95,6 @@ output = sys.stdout.getvalue()
       });
     }
 
-    // TypeError
     if (message.includes("TypeError") && message.includes("unsupported operand type")) {
       suggestions.push({
         suggestion: `Use str() or int() to match data types`,
@@ -101,7 +102,6 @@ output = sys.stdout.getvalue()
       });
     }
 
-    // ValueError
     if (message.includes("ValueError")) {
       suggestions.push({
         suggestion: "Validate input or data format",
@@ -109,7 +109,6 @@ output = sys.stdout.getvalue()
       });
     }
 
-    // AttributeError
     if (message.includes("AttributeError") && /'(.+?)' object has no attribute '(.+?)'/.test(message)) {
       const [, objType, method] = message.match(/'(.+?)' object has no attribute '(.+?)'/);
       suggestions.push({
@@ -118,7 +117,6 @@ output = sys.stdout.getvalue()
       });
     }
 
-    // SyntaxError
     if (message.includes("SyntaxError")) {
       suggestions.push({
         suggestion: "Check line endings, colons, or indentation",
@@ -126,7 +124,13 @@ output = sys.stdout.getvalue()
       });
     }
 
-    // ZeroDivisionError
+    if (message.includes("IndentationError")) {
+      suggestions.push({
+        suggestion: "Fix indentation levels (tabs/spaces mismatch)",
+        explanation: "Python is sensitive to whitespace.\n→ Mixed tabs/spaces?\n→ Misaligned blocks?\n→ Forgot indentation after colon?",
+      });
+    }
+
     if (message.includes("ZeroDivisionError")) {
       suggestions.push({
         suggestion: "Make sure denominator is not zero",
@@ -134,7 +138,6 @@ output = sys.stdout.getvalue()
       });
     }
 
-    // IndexError
     if (message.includes("IndexError")) {
       suggestions.push({
         suggestion: "Check index and list length",
@@ -142,22 +145,32 @@ output = sys.stdout.getvalue()
       });
     }
 
+    // Add highlighting
+    if (highlightLine && window.editor && window.monaco) {
+      oldDecorations = window.editor.deltaDecorations([], [
+        {
+          range: new monaco.Range(highlightLine, 1, highlightLine, 1),
+          options: {
+            isWholeLine: true,
+            className: 'errorLineHighlight',
+            glyphMarginClassName: 'errorGlyph',
+          },
+        },
+      ]);
+    }
+
     const prettyTrace = message
       .replaceAll('<', '&lt;')
       .replaceAll('>', '&gt;')
-      .replaceAll('\n', '<br/>');
+      .replaceAll('\n', '<br/>')
+      + (highlightLine ? `<br/><br/><span class="text-yellow-400">⚠️ Error occurred on line ${highlightLine-4}</span>` : '');
 
     if (suggestions.length > 0) {
       const { suggestion, explanation } = suggestions[0];
       outputDiv.innerHTML = `
-        <div class="text-red-400 font-bold mb-1">FixyPy Calm Debugger</div>
-        <div class="text-sm text-green-100 whitespace-pre-wrap font-mono mb-2">
-          Suggestion: ${suggestion}<br/>
-          ${explanation}
-        </div>
-        <div class="text-[10px] text-gray-400 mt-2 font-mono leading-tight">
-          ${prettyTrace}
-        </div>
+      <div class="text-red-400 font-bold mb-1">FixyPy Calm Debugger</div>
+      <div class="text-sm text-green-100 whitespace-pre-wrap font-mono mb-2">Suggestion: ${suggestion}<br/>${explanation}</div>
+      <div class="text-[10px] text-gray-400 mt-2 font-mono leading-tight">${prettyTrace}</div>
       `;
     } else {
       outputDiv.innerHTML = `

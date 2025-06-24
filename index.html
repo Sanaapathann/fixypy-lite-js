@@ -1,14 +1,113 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FixyPy</title>
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
-    <link href="style.css" rel="stylesheet">
-    <script type="module" src="script.js" defer></script>
-  </head>
-  <body class= "bg-gradient text-fixypy">
-    <div id="app"></div>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FixyPy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Lexend&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+  <script src="https://unpkg.com/monaco-editor@latest/min/vs/loader.js"></script>
+  <script type="module" src="script.js" defer></script>
+  <style>
+    :root {
+      --fixypy-green: #66FF00;
+      --fixypy-dark: #101010;
+      --fixypy-panel: #181818;
+    }
+    body {
+      background-color: var(--fixypy-dark);
+      color: var(--fixypy-green);
+    }
+    #editor {
+      height: 280px;
+      width: 100%;
+      border-radius: 0.5rem;
+      border: 1px solid #333;
+      overflow: hidden;
+    }
+    .errorLineHighlight {
+      background-color: rgba(255, 0, 0, 0.2) !important;
+    }
+
+    .errorGlyph {
+      background-color: red;
+      width: 4px;
+      height: 100%;
+      margin-left: 2px;
+    }
+    #output {
+      background-color: #111;
+      color: #cfcfcf;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      min-height: 100px;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: monospace;
+    }
+    .monaco-editor, .monaco-editor-background, .monaco-editor .margin, .monaco-editor .view-lines {
+      background-color: var(--fixypy-panel) !important;
+      color: var(--fixypy-green) !important;
+    }
+  </style>
+</head>
+<body class="font-sans">
+
+  <!-- Header -->
+  <header class="flex items-center justify-between p-2 border-b border-gray-800">
+    <h1 class="text-2xl font-bold text-[var(--fixypy-green)] font-['Lexend'] ml-4">FixyPy</h1>
+    <button id="execute" class="px-4 py-2 rounded hover:bg-[var(--fixypy-green)]/20 transition text-[var(--fixypy-green)] font-semibold font-['Fira_Code']">> Run</button>
+  </header>
+
+  <!-- Main content -->
+  <main class="p-6 space-y-6">
+    <!-- Editor -->
+    <section id="editor" class="rounded shadow-inner"></section>
+
+    <!-- Output -->
+    <section id="output" class="rounded border border-gray-800 shadow-inner p-4 h-48 text-[var(--fixypy-green)] bg-[var(--fixypy-panel)]">
+      Output will appear here...
+    </section>
+  </main>
+
+  <!-- Modal for input -->
+  <div id="inputModal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50">
+    <div class="bg-[var(--fixypy-panel)] p-6 rounded-xl w-96 shadow-2xl border border-[var(--fixypy-green)]">
+      <p id="inputPrompt" class="mb-4 text-lg font-semibold text-[var(--fixypy-green)]">Enter value:</p>
+      <input id="inputField" type="text" class="w-full p-2 rounded-md bg-[#111] border border-[var(--fixypy-green)] text-[var(--fixypy-green)] focus:outline-none focus:ring-2 focus:ring-[var(--fixypy-green)]">
+      <div class="flex justify-end mt-4">
+        <button id="submitInput" class="bg-[var(--fixypy-green)] hover:bg-lime-300 text-black font-semibold px-4 py-2 rounded-md transition">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="text-xs text-gray-500 text-center p-4 border-t border-gray-800">
+    FixyPy reduces coding anxiety by offering human-like feedback and a calming workspace. It's built for beginners, dreamers, and anyone tired of staring at red errors.
+  </footer>
+
+  <!-- Monaco Editor Setup -->
+  <script>
+    require.config({ paths: { vs: 'https://unpkg.com/monaco-editor@latest/min/vs' } });
+    require(['vs/editor/editor.main'], function () {
+      window.monaco = monaco;
+      window.editor = monaco.editor.create(document.getElementById('editor'), {
+        value: [
+          "user_input = input(\"Enter something: \")",
+          "if user_input == \"\":",
+          "    print(\"You entered nothing!\")",
+          "x = y"
+        ].join("\n"),
+        language: 'python',
+        theme: 'vs-dark',
+        fontSize: 14,
+        minimap: { enabled: false },
+        automaticLayout: true
+      });
+    });
+  </script>
+</body>
 </html>
