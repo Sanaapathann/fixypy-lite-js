@@ -11,14 +11,17 @@ async function init() {
 async function runCode() {
   const codeInput = window.editor.getValue();
   const outputDiv = document.getElementById("output");
+  const tipsDiv = document.getElementById("python-tips");
+  tipsDiv.innerHTML = "";  
 
   const suggestion = getFixSuggestion(codeInput);
   if (suggestion) {
-    outputDiv.innerHTML = `
-    <div class="text-yellow-300 font-semibold mb-1">Suggestion:</div>
-    <div class="text-sm text-green-100 whitespace-pre-wrap font-mono">${suggestion.suggestion}</div>
-    <div class="text-sm text-green-400 whitespace-pre-wrap font-mono mt-1">${suggestion.explanation}</div>
+    tipsDiv.innerHTML = `
+      <div class="text-yellow-300 font-semibold mb-1">Suggestion:</div>
+      <div class="text-sm text-green-100 whitespace-pre-wrap font-mono">${suggestion.suggestion}</div>
+      <div class="text-sm text-green-400 whitespace-pre-wrap font-mono mt-1">${suggestion.explanation}</div>
     `;
+
     return;
   }
 
@@ -58,6 +61,8 @@ function handleInputs(code, matches, i) {
 
 async function runFinalCode(code) {
   const outputDiv = document.getElementById("output");
+  const tipsDiv = document.getElementById("python-tips");
+  tipsDiv.innerHTML = "";  
 
   //clear old highlights
   if (oldDecorations.length > 0) {
@@ -74,7 +79,7 @@ output = sys.stdout.getvalue()
     `);
 
     const result = pyodide.globals.get("output");
-    outputDiv.innerText = result || "No output.";
+    outputDiv.innerText = result || "Let's print() something!";
   } catch (err) {
     const message = err.toString();
     const suggestions = [];
@@ -167,18 +172,15 @@ output = sys.stdout.getvalue()
 
     if (suggestions.length > 0) {
       const { suggestion, explanation } = suggestions[0];
-      outputDiv.innerHTML = `
-      <div class="text-red-400 font-bold mb-1">FixyPy Calm Debugger</div>
-      <div class="text-sm text-green-100 whitespace-pre-wrap font-mono mb-2">Suggestion: ${suggestion}<br/>${explanation}</div>
-      <div class="text-[10px] text-gray-400 mt-2 font-mono leading-tight">${prettyTrace}</div>
+      tipsDiv.innerHTML = `<div class="text-red-400 font-bold mb-1">FixyPy Calm Debugger</div>
+        <div class="text-sm text-green-100 whitespace-pre-wrap font-mono mb-2">Suggestion: ${suggestion}<br/>${explanation}</div>
+        ...
       `;
     } else {
       outputDiv.innerHTML = `
-        <div class="text-red-400 font-bold mb-1">Python Error</div>
         <div class="text-[10px] text-gray-400 mt-2 font-mono leading-tight">
           ${prettyTrace}
-        </div>
-      `;
+        </div>`
     }
   }
 }

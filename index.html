@@ -20,10 +20,8 @@
       color: var(--fixypy-green);
     }
     #editor {
-      height: 280px;
       width: 100%;
-      border-radius: 0.5rem;
-      border: 1px solid #333;
+      border: 1px solid #181818;
       overflow: hidden;
     }
     .errorLineHighlight {
@@ -37,21 +35,31 @@
       margin-left: 2px;
     }
     #output {
-      background-color: #111;
+      background-color: #181818;
       color: #cfcfcf;
       padding: 1rem;
       border-radius: 0.5rem;
-      min-height: 100px;
-      max-height: 400px;
+      width: 100%;
+      height: 300px;
       overflow-y: auto;
       white-space: pre-wrap;
       word-break: break-word;
       font-family: monospace;
     }
-    .monaco-editor, .monaco-editor-background, .monaco-editor .margin, .monaco-editor .view-lines {
-      background-color: var(--fixypy-panel) !important;
-      color: var(--fixypy-green) !important;
+    #python-tips{
+      background-color: #181818;
+      color: #cfcfcf;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      top: 300px;
+      width: 100%;
+      height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: monospace;
     }
+
   </style>
 </head>
 <body class="font-sans">
@@ -59,19 +67,32 @@
   <!-- Header -->
   <header class="flex items-center justify-between p-2 border-b border-gray-800">
     <h1 class="text-2xl font-bold text-[var(--fixypy-green)] font-['Lexend'] ml-4">FixyPy</h1>
-    <button id="execute" class="px-4 py-2 rounded hover:bg-[var(--fixypy-green)]/20 transition text-[var(--fixypy-green)] font-semibold font-['Fira_Code']">> Run</button>
+    <button id="execute" class="px-4 py-2 rounded hover:bg-[var(--fixypy-green)]/20 transition text-[var(--fixypy-green)] font-semibold font-['Fira_Code']">Run ⏵</button>
   </header>
 
   <!-- Main content -->
-  <main class="p-6 space-y-6">
-    <!-- Editor -->
-    <section id="editor" class="rounded shadow-inner"></section>
+<main class="flex gap-4 p-6">
+  
+  <!-- LEFT: Editor in a box -->
+  <div class="bg-[#181818] p-4 rounded w-1/2 h-[600px] ">
+    <section id="editor" class="h-full w-full rounded shadow-inner"></section>
+  </div>
 
-    <!-- Output -->
-    <section id="output" class="rounded border border-gray-800 shadow-inner p-4 h-48 text-[var(--fixypy-green)] bg-[var(--fixypy-panel)]">
-      Output will appear here...
+  <!-- RIGHT: Output + Tips stacked -->
+  <div class="flex flex-col gap-4 w-1/2 h-[600px]">
+    <section id="output" class="h-[292px] rounded shadow-inner px-4 pt-2 pb-4 text-[var(--fixypy-green)] bg-[var(--fixypy-panel)] overflow-auto leading-tight text-sm">
+      Let’s print() something!!
     </section>
-  </main>
+
+    <section id="python-tips" class="h-[292px] rounded shadow-inner px-4 pt-2 pb-4 text-[var(--fixypy-green)] bg-[var(--fixypy-panel)] overflow-auto leading-tight text-sm">
+      No tips this time. You got this!!
+    </section>
+
+  </div>
+
+</main>
+
+
 
   <!-- Modal for input -->
   <div id="inputModal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50">
@@ -90,24 +111,46 @@
   </footer>
 
   <!-- Monaco Editor Setup -->
-  <script>
-    require.config({ paths: { vs: 'https://unpkg.com/monaco-editor@latest/min/vs' } });
-    require(['vs/editor/editor.main'], function () {
-      window.monaco = monaco;
-      window.editor = monaco.editor.create(document.getElementById('editor'), {
-        value: [
-          "user_input = input(\"Enter something: \")",
-          "if user_input == \"\":",
-          "    print(\"You entered nothing!\")",
-          "x = y"
-        ].join("\n"),
-        language: 'python',
-        theme: 'vs-dark',
-        fontSize: 14,
-        minimap: { enabled: false },
-        automaticLayout: true
-      });
-    });
-  </script>
+   <script>
+require.config({ paths: { vs: 'https://unpkg.com/monaco-editor@latest/min/vs' } });
+require(['vs/editor/editor.main'], function () {
+  monaco.editor.defineTheme('fixypy-theme', {
+    base: 'vs-dark',
+    inherit: true,
+    rules: [],
+    colors: {
+      'editor.foreground': '#66FF00',
+      'editor.background': '#181818',
+      'editor.selectionBackground': '#264f78',  // BLUE highlight
+      'editorCursor.foreground': '#66FF00',
+      'editor.lineHighlightBackground': '#1e1e1e55',
+      'editor.lineHighlightBorder': '#333333'
+    }
+  });
+
+
+  window.editor = monaco.editor.create(document.getElementById('editor'), {
+  value: [
+    "# Stop Ctrl+C Ctrl+V’ing.",
+    "# Try using your brain this time. FixyPy watching ;)",
+    "",
+    "mood = input(\"How's life, coder? \")",
+    "if mood == \"\":",
+    "    print(\"say something, don’t ghost me!!!!\")",
+    "",
+    "print(mood * 2)",
+    "x = y  # oops, fix me"
+  ].join("\n"),
+
+    language: 'python',
+    theme: 'fixypy-theme',
+    fontSize: 14,
+    minimap: { enabled: false },
+    automaticLayout: true
+  });
+});
+
+</script>
+
 </body>
 </html>
