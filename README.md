@@ -43,20 +43,6 @@ It aims to bridge learning and debugging by offering:
 
 ---
 
-## Project Structure
-
-```text
-fixypy-lite-js/
-├── index.html         # Editor layout and modal structure
-├── script.js          # Core logic: Pyodide, execution, suggestions
-├── pyfixer.js         # Suggestion engine (regex-based)
-├── fileManager.js     # Rename/delete files (UI only)
-├── styles/            # Tailwind config (optional)
-└── assets/            # Icons, themes, and fonts
-```
-
----
-
 ## Planned Improvements
 
 * Calm tip log (with expandable context)
