@@ -48,4 +48,4 @@ export function getFixSuggestion(code) {
 
   return fixes.length > 0 ? fixes[0] : null;
 
-}
+} 

@@ -11,9 +11,13 @@
   <script type="module" src="script.js" defer></script>
   <style>
     :root {
-      --fixypy-green: #66FF00;
-      --fixypy-dark: #101010;
+      --fixypy-gray: #2F4F4F;
+      --fixypy-green: #76FF7A;
+      --fixypy-dark: #1B1B1B;
       --fixypy-panel: #181818;
+    }
+    .bg-dark{
+      background-color: var(--fixypy-dark);
     }
     body {
       background-color: var(--fixypy-dark);
@@ -23,6 +27,7 @@
       width: 100%;
       border: 1px solid #181818;
       overflow: hidden;
+      border-radius: 0.5rem;
     }
     .errorLineHighlight {
       background-color: rgba(255, 0, 0, 0.2) !important;
@@ -60,37 +65,104 @@
       font-family: monospace;
     }
 
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #111;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: var(--fixypy-green);
+      border-radius: 8px;
+      border: 2px solid #111;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: #76FF7A;
+    }
+
+    #editor, #output, #python-tips {
+      border: 1px solid var(--fixypy-gray);
+    }
+    #container{
+      border-radius: 0.5rem;
+    }
+
   </style>
 </head>
 <body class="font-sans">
 
   <!-- Header -->
-  <header class="flex items-center justify-between p-2 border-b border-gray-800">
-    <h1 class="text-2xl font-bold text-[var(--fixypy-green)] font-['Lexend'] ml-4">FixyPy</h1>
-    <button id="execute" class="px-4 py-2 rounded hover:bg-[var(--fixypy-green)]/20 transition text-[var(--fixypy-green)] font-semibold font-['Fira_Code']">Run ⏵</button>
-  </header>
-
-  <!-- Main content -->
-<main class="flex gap-4 p-6">
-  
-  <!-- LEFT: Editor in a box -->
-  <div class="bg-[#181818] p-4 rounded w-1/2 h-[600px] ">
-    <section id="editor" class="h-full w-full rounded shadow-inner"></section>
+<header class="sticky top-0 z-50 bg-dark backdrop-blur flex items-center justify-between px-4 py-2 border-b border-gray-800 shadow">
+  <div>
+    <h1 class="text-xl sm:text-2xl font-bold text-[var(--fixypy-green)] font-['Lexend']">FixyPy</h1>
+    <p class="text-xs text-gray-400 font-['Lexend'] tracking-wide">a calm space to fix your Python code</p>
   </div>
 
+  <div class="flex items-center gap-3">
+    <img src="assets/pyicon.png" alt="Run" class="w-10 h-8">
+  </div>
+</header>
+
+
+  <!-- Main content -->
+<main class="flex flex-col sm:flex-row gap-4 px-4 py-6">
+
+  <!-- LEFT: Editor in a box -->
+<div id="container" class="bg-[#181818] border border-[var(--fixypy-gray)] p-4  rounded px-2 w-full sm:w-1/2 h-[600px] flex flex-col gap-2">
+
+  <!-- Filename and Save button -->
+<!-- Filename and Save/Run buttons -->
+<div class="flex items-center justify-between gap-2 mb-1">
+
+  <!-- Filename Input -->
+  <input id="filename" value="main.py"
+    class="bg-transparent border border-transparent hover:border-[var(--fixypy-green)] rounded px-1 py-1 focus:outline-none focus:border-[var(--fixypy-green)] text-sm font-['Fira_Code'] text-[var(--fixypy-green)] w-32">
+
+  <!-- Action Buttons -->
+  <div class="flex gap-2">
+    <!-- Run Button -->
+    <button id="execute"
+      class="flex items-center gap-1 text-xs bg-[var(--fixypy-green)] text-black font-semibold px-1 py-1 rounded hover:bg-black-300 transition">
+      <img src="assets/play-icon.png" alt="Run" class="w-4 h-4">Run
+    </button>
+
+    <!-- Save Button -->
+    <button id="saveFile"
+      class="flex items-center gap-1 text-xs bg-[var(--fixypy-green)] text-black font-semibold px-1 py-1 rounded hover:bg-black-300 transition">
+      <img src="assets/save-icon.png" alt="Save" class="w-4 h-4">Save
+    </button>
+  </div>
+</div>
+
+
+  <!-- Monaco Editor Area -->
+  <section id="editor" class="flex-1 w-full rounded shadow-inner"></section>
+  
+</div>
+
+
+
   <!-- RIGHT: Output + Tips stacked -->
-  <div class="flex flex-col gap-4 w-1/2 h-[600px]">
-    <section id="output" class="h-[292px] rounded shadow-inner px-4 pt-2 pb-4 text-[var(--fixypy-green)] bg-[var(--fixypy-panel)] overflow-auto leading-tight text-sm">
-      Let’s print() something!!
+  <div class="flex flex-col gap-4 w-full sm:w-1/2 h-auto sm:h-[600px]">
+    <section id="output"
+      class="h-[250px] sm:h-[292px] rounded shadow-inner px-4 pb-4 text-[var(--fixypy-green)] bg-[var(--fixypy-panel)] overflow-auto leading-tight text-sm flex flex-col justify-start">
+      <div class="mt-0 pt-0">Let’s print() something!!</div>
     </section>
 
-    <section id="python-tips" class="h-[292px] rounded shadow-inner px-4 pt-2 pb-4 text-[var(--fixypy-green)] bg-[var(--fixypy-panel)] overflow-auto leading-tight text-sm">
-      No tips this time. You got this!!
+    <section id="python-tips"
+      class="h-[250px] sm:h-[292px] rounded shadow-inner px-4 pb-4 text-[var(--fixypy-green)] bg-[var(--fixypy-panel)] overflow-auto leading-tight text-sm flex flex-col justify-start">
+      <div class="mt-0 pt-0">No tips this time. You got this!!</div>
     </section>
 
   </div>
 
 </main>
+
 
 
 
@@ -114,19 +186,25 @@
    <script>
 require.config({ paths: { vs: 'https://unpkg.com/monaco-editor@latest/min/vs' } });
 require(['vs/editor/editor.main'], function () {
-  monaco.editor.defineTheme('fixypy-theme', {
-    base: 'vs-dark',
-    inherit: true,
-    rules: [],
-    colors: {
-      'editor.foreground': '#66FF00',
-      'editor.background': '#181818',
-      'editor.selectionBackground': '#264f78',  // BLUE highlight
-      'editorCursor.foreground': '#66FF00',
-      'editor.lineHighlightBackground': '#1e1e1e55',
-      'editor.lineHighlightBorder': '#333333'
-    }
-  });
+ monaco.editor.defineTheme('fixypy-theme', {
+  base: 'vs-dark',
+  inherit: true,
+  rules: [],
+  colors: {
+    'editor.background': '#181818',
+    'editor.foreground': '#66FF00',
+    'editor.selectionBackground': '#264f78',
+    'editorCursor.foreground': '#66FF00',
+    'editor.lineHighlightBackground': '#1e1e1e55',
+    'editor.lineHighlightBorder': '#333333',
+
+    
+    'scrollbarSlider.background': '#2F4F4F',
+    'scrollbarSlider.hoverBackground': '#76FF7A',
+    'scrollbarSlider.activeBackground': '#76FF7A',
+  }
+});
+
 
 
   window.editor = monaco.editor.create(document.getElementById('editor'), {
@@ -146,8 +224,43 @@ require(['vs/editor/editor.main'], function () {
     theme: 'fixypy-theme',
     fontSize: 14,
     minimap: { enabled: false },
-    automaticLayout: true
+    automaticLayout: true,
+
+    scrollbar: {
+      verticalScrollbarSize: 4,
+      horizontalScrollbarSize: 6,
+      alwaysConsumeMouseWheel: false,
+      useShadows: false,
+      vertical: 'auto',
+      horizontal: 'auto'
+    }
+
   });
+
+});
+window.addEventListener('resize', () => {
+  if (window.editor) editor.layout();
+});
+ tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          code: ['Fira Code', 'monospace'],
+          lex: ['Lexend', 'sans-serif']
+        }
+      }
+    }
+  }
+
+document.getElementById("saveFile").addEventListener("click", () => {
+  const filename = document.getElementById("filename").value.trim() || "fixypy.py";
+  const code = window.editor.getValue();
+
+  const blob = new Blob([code], { type: "text/x-python" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
 });
 
 </script>

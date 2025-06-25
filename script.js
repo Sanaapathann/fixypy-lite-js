@@ -170,18 +170,16 @@ output = sys.stdout.getvalue()
       .replaceAll('\n', '<br/>')
       + (highlightLine ? `<br/><br/><span class="text-yellow-400">⚠️ Error occurred on line ${highlightLine-4}</span>` : '');
 
+    outputDiv.innerHTML = `<div class="text-[10px] text-gray-400 mt-2 font-mono leading-tight">${prettyTrace}</div>`;
+
     if (suggestions.length > 0) {
       const { suggestion, explanation } = suggestions[0];
       tipsDiv.innerHTML = `<div class="text-red-400 font-bold mb-1">FixyPy Calm Debugger</div>
-        <div class="text-sm text-green-100 whitespace-pre-wrap font-mono mb-2">Suggestion: ${suggestion}<br/>${explanation}</div>
-        ...
-      `;
+        <div class="text-sm text-green-100 whitespace-pre-wrap font-mono mb-2">Suggestion: ${suggestion}<br/>${explanation}</div>`;
     } else {
-      outputDiv.innerHTML = `
-        <div class="text-[10px] text-gray-400 mt-2 font-mono leading-tight">
-          ${prettyTrace}
-        </div>`
+      tipsDiv.innerHTML = `<div class="text-gray-500 text-sm italic font-mono">No tips this time. You got this!!</div>`;
     }
+
   }
 }
 
