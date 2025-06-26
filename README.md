@@ -60,4 +60,4 @@ It aims to bridge learning and debugging by offering:
 
 ## Contribution
 
-Currently under active solo development. Clean PRs or small bug reports welcome. Regex-based suggestion modules should remain simple, readable, and fully explainable.
+FixyPy is built solo, with a focus on clarity over complexity. Suggestions are regex-based, explainable, and intentionally minimal. Contributions are welcome, but simplicity is key.
