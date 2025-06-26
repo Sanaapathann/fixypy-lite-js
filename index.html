@@ -235,6 +235,14 @@
       a.download = filename;
       a.click();
     });
+    document.addEventListener("DOMContentLoaded", () => {
+      const title = document.getElementById("fixypyTitle");
+      if (title) {
+        title.addEventListener("click", () => {
+          location.reload();
+        });
+      }
+    });
   </script>
 </body>
 </html>
