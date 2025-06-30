@@ -1,42 +1,39 @@
-export function getFixSuggestion(code) {
+const builtins = ["str", "int", "float", "list", "dict", "set", "bool", "sum", "min", "max", "print"];
+
+export function fixSyntaxIssues(code) {
+  const lines = code.split("\n");
   const fixes = [];
-  const trimmed = code.trim();
-  // Remove comments
-  const codeWithoutComments = code
-    .split('\n')
-    .map(line => line.trim().startsWith('#') ? '' : line)
-    .join('\n');
-  // 1. input() used
-  if (codeWithoutComments.includes("input(")) {
-    fixes.push({
-      suggestion: 'input() will open a popup!',
-      explanation: "FixyPy supports input() via popup. Enter your value when prompted. And Make sure you're using the variable in code else fixypy wont popup the modal!!",
-    });
+  const warnings = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    const originalLine = line; // store original
+    let fixedLine = line;
+
+    // Example: fix unquoted input prompt
+    const inputMatch = line.match(/input\(([^'"].*?)\)/);
+    if (inputMatch) {
+      const prompt = inputMatch[1];
+      fixes.push(`Line ${i + 1}: Quoted input() prompt → input("${prompt}")`);
+    }
+
+    // Example: print without parentheses
+    const printMatch = line.match(/^\s*print\s+['"][^)]*$/);
+    if (printMatch) {
+      fixes.push(`Line ${i + 1}: Missing parentheses in print — Did you mean print(...) ?`);
+    }
+
+    // Example: built-in override warning
+    const overrideMatch = line.match(/\b(str|list|dict|input|print)\s*=/);
+    if (overrideMatch) {
+      warnings.push(`Line ${i + 1}: Overwriting Python built-in: '${overrideMatch[1]}'`);
+    }
   }
-  // 2. string number operation
-   if (/".*"\s*[-+*/]\s*\d+/.test(codeWithoutComments)) {
-    fixes.push({
-      suggestion: 'Convert number to string: "${trimmed.match(/"(.*)"/)?.[1] ?? "text"}" + str(1)',
-      explanation: "You can't subtract/add a number and string directly. Try converting types!",
-    });
-  }
-  // 3. bare identifier (like: a, name)
-  if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(trimmed)) {
-    fixes.push({
-      suggestion: '"${trimmed}"',
-      explanation: 'You entered "${trimmed}" - Python sees it as a variable, but its not defined.\nDid you mean to:\n- Make it a string? → "${trimmed}"\n- Assign it? → ${trimmed} = "value"\n- Print it? → print(${trimmed})',
-    });
-  }
-  // 4. bare number (like: 5)
-  if (/^\d+$/.test(trimmed)) {
-    fixes.push({
-      suggestion: 'print(${trimmed})',
-      explanation: "You typed a number. Want to print it to see the result?",
-    });
-  }
-  // 5. Looks valid (has print)
-  if (codeWithoutComments.includes("print(")) {
-    return null;
-  }
-  return fixes.length > 0 ? fixes[0] : null;
-} 
+
+  return {
+    fixedCode: code, 
+    fixes,
+    warnings,
+  };
+}
+

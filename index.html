@@ -94,6 +94,13 @@
     .shake-on-hover:hover {
       animation: shake 0.4s ease-in-out;
     }
+    .fixyBulb {
+      background: url('https://img.icons8.com/ios-filled/24/light-on.png') no-repeat center center;
+      background-size: 16px 16px;
+      width: 16px;
+      height: 16px;
+      margin-left: 2px;
+    }
   </style>
 </head>
 <body class="font-sans">
@@ -141,7 +148,6 @@
         class="h-[250px] sm:h-[292px] rounded shadow-inner px-4 pb-4 text-[var(--fixypy-green)] bg-[var(--fixypy-panel)] overflow-auto leading-tight text-sm flex flex-col justify-start">
         <div class="mt-0 pt-0">Let’s print() something!!</div>
       </section>
-
       <section id="python-tips"
         class="h-[250px] sm:h-[292px] rounded shadow-inner px-4 pb-4 text-[var(--fixypy-green)] bg-[var(--fixypy-panel)] overflow-auto leading-tight text-sm flex flex-col justify-start">
         <div class="mt-0 pt-0">No tips this time. You got this!!</div>
@@ -226,9 +232,12 @@
         }
     }
     document.getElementById("saveFile").addEventListener("click", () => {
-      const filename = document.getElementById("filename").value.trim() || "fixypy.py";
+      let filename = document.getElementById("filename").value.trim() || "fixypy.py";
+      if (!filename.endsWith(".py")) {
+        const baseName = filename.split(".")[0];  
+        filename = `${baseName}.py`;
+      }
       const code = window.editor.getValue();
-
       const blob = new Blob([code], { type: "text/x-python" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
