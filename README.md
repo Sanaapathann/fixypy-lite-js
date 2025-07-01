@@ -5,11 +5,15 @@
 Unlike full AI assistants, FixyPy avoids overwhelming beginners with generated solutions. Instead, it uses basic regex-based analysis and clean debugging hints to encourage learning through structured trial and error.
 
 ---
-## Screenshot
+## Screenshots
 
 <p align="center">
-  <img src="assets/ss1.png" alt="FixyPy Screenshot" width="700">
+  <img src="assets/ss1.png" alt="FixyPy Screenshot 1" width="700"><br><br>
+  <img src="assets/ss2.png" alt="FixyPy Screenshot 2" width="700"><br><br>
+  <img src="assets/ss3.png" alt="FixyPy Screenshot 3" width="700"><br><br>
+  <img src="assets/ss4.png" alt="FixyPy Screenshot 4" width="700">
 </p>
+
 
 
 ## Features
